@@ -1,5 +1,6 @@
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::io::Result;
+use nalgebra::DMatrix;
 
 /// Header used by TGA image files
 #[derive(Debug)]
@@ -18,11 +19,24 @@ struct Header {
     image_desc: u8, // image descriptor
 }
 
-struct Pixel {
-    bgra: [u8; 4],
+#[derive(Clone,Copy)]
+pub struct TgaColor {
+    pub argb: [u8; 4],
+}
+
+impl TgaColor {
+    fn write<W: WriteBytesExt>(p: &Self, w: &mut W) -> Result<()> {
+        let mut i = 4;
+        while i > 0 {
+            i -= 1;
+            try!(w.write_u8(p.argb[i]));
+        }
+        Ok(())
+    }
 }
 
 const RAW_TRUE_COLOR: u8 = 2;
+const ARGB_DEPTH: u8 = 32;
 
 impl Header {
     fn new(w: u16, h: u16) -> Header {
@@ -37,10 +51,11 @@ impl Header {
             y_origin: 0,
             image_width: w,
             image_height: h,
-            pixel_depth: 32,
+            pixel_depth: ARGB_DEPTH,
             image_desc: 0,
         }
     }
+
     fn write<W: WriteBytesExt>(h: &Self, w: &mut W) -> Result<()> {
         try!(w.write_u8(h.id_length));
         try!(w.write_u8(h.map_type));
@@ -58,11 +73,28 @@ impl Header {
     }
 }
 
-impl Pixel {
-    fn write<W: WriteBytesExt>(p: &Self, w: &mut W) -> Result<()> {
-        for i in 0..4 {
-            try!(w.write_u8(p.bgra[i]));
+pub struct TgaImage {
+    width: usize,
+    height: usize,
+    data: DMatrix<TgaColor>,
+}
+
+impl TgaImage {
+    pub fn new<'a>(w: usize, h: usize) -> TgaImage {
+        let c = TgaColor { argb: [0, 0, 0, 0] };
+        TgaImage {
+            width: w,
+            height: h,
+            data: DMatrix::from_element(h, w, c),
         }
-        Ok(())
+    }
+
+    pub fn set(self: &mut Self, x: usize, y: usize, c: TgaColor) -> bool {
+        if x < 0 || y < 0 || x >= self.width || y >= self.width {
+            false
+        } else {
+            self.data[(y, x)] = c;
+            true
+        }
     }
 }
