@@ -21,16 +21,15 @@ struct Header {
 
 #[derive(Clone,Copy)]
 pub struct TgaColor {
-    pub argb: [u8; 4],
+    pub rgba: [u8; 4],
 }
 
 impl TgaColor {
     fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
-        let mut i = 4;
-        while i > 0 {
-            i -= 1;
-            try!(w.write_u8(self.argb[i]));
-        }
+        try!(w.write_u8(self.rgba[2]));
+        try!(w.write_u8(self.rgba[1]));
+        try!(w.write_u8(self.rgba[0]));
+        try!(w.write_u8(self.rgba[3]));
         Ok(())
     }
 }
@@ -81,7 +80,7 @@ pub struct TgaImage {
 
 impl TgaImage {
     pub fn new(w: usize, h: usize) -> TgaImage {
-        let c = TgaColor { argb: [255, 0, 0, 0] };
+        let c = TgaColor { rgba: [0, 0, 0, 255] };
         TgaImage {
             width: w,
             height: h,
