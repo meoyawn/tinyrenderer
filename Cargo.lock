@@ -2,11 +2,11 @@
 name = "tinyrenderer"
 version = "0.1.0"
 dependencies = [
- "nom 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "byteorder 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
-name = "nom"
-version = "1.2.2"
+name = "byteorder"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 

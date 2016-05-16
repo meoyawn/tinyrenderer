@@ -1,6 +1,5 @@
 mod tga;
-#[macro_use]
-extern crate nom;
+extern crate byteorder;
 
 fn main() {
     println!("Hello, world!");

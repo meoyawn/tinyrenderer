@@ -1,88 +1,68 @@
-use std::ops::Index;
-use std::ops::Mul;
+use byteorder::{LittleEndian, WriteBytesExt};
+use std::io::Result;
 
-struct TgaHeader {
-    idlength: i8,
-    colormaptype: i8,
-    datatypecode: i8,
-    colormaporigin: i16,
-    colormaplength: i16,
-    colormapdepth: i8,
-    x_origin: i16,
-    y_origin: i16,
-    width: i16,
-    height: i16,
-    bitsperpixel: i8,
-    imagedescriptor: i8,
+/// Header used by TGA image files
+#[derive(Debug)]
+struct Header {
+    id_length: u8, // length of ID string
+    map_type: u8, // color map type
+    image_type: u8, // image type code
+    map_origin: u16, // starting index of map
+    map_length: u16, // length of map
+    map_entry_size: u8, // size of map entries in bits
+    x_origin: u16, // x-origin of image
+    y_origin: u16, // y-origin of image
+    image_width: u16, // width of image
+    image_height: u16, // height of image
+    pixel_depth: u8, // bits per pixel
+    image_desc: u8, // image descriptor
 }
 
-#[derive(Clone, Copy)]
-struct TgaColor {
+struct Pixel {
     bgra: [u8; 4],
-    bytespp: u8,
 }
 
-impl Index<usize> for TgaColor {
-    type Output = u8;
+const RAW_TRUE_COLOR: u8 = 2;
 
-    fn index(&self, ind: usize) -> &u8 {
-        &self.bgra[ind]
-    }
-}
-
-impl Mul<f32> for TgaColor {
-    type Output = TgaColor;
-
-    fn mul(self, intensity: f32) -> TgaColor {
-        let bounded = 1f32.min(0f32.max(intensity));
-        TgaColor {
-            bgra: [(self[0] as f32 * bounded) as u8,
-                   (self[1] as f32 * bounded) as u8,
-                   (self[2] as f32 * bounded) as u8,
-                   (self[3] as f32 * bounded) as u8],
-            bytespp: self.bytespp,
+impl Header {
+    fn new(w: u16, h: u16) -> Header {
+        Header {
+            id_length: 0,
+            map_type: 0,
+            image_type: RAW_TRUE_COLOR,
+            map_origin: 0,
+            map_length: 0,
+            map_entry_size: 0,
+            x_origin: 0,
+            y_origin: 0,
+            image_width: w,
+            image_height: h,
+            pixel_depth: 32,
+            image_desc: 0,
         }
     }
-}
-
-fn make_empty() -> TgaColor {
-    TgaColor {
-        bgra: [0; 4],
-        bytespp: 1,
+    fn write<W: WriteBytesExt>(h: &Self, w: &mut W) -> Result<()> {
+        try!(w.write_u8(h.id_length));
+        try!(w.write_u8(h.map_type));
+        try!(w.write_u8(h.image_type));
+        try!(w.write_u16::<LittleEndian>(h.map_origin));
+        try!(w.write_u16::<LittleEndian>(h.map_length));
+        try!(w.write_u8(h.map_entry_size));
+        try!(w.write_u16::<LittleEndian>(h.x_origin));
+        try!(w.write_u16::<LittleEndian>(h.y_origin));
+        try!(w.write_u16::<LittleEndian>(h.image_width));
+        try!(w.write_u16::<LittleEndian>(h.image_height));
+        try!(w.write_u8(h.pixel_depth));
+        try!(w.write_u8(h.image_desc));
+        Ok(())
     }
 }
 
-fn make_argb(r: u8, g: u8, b: u8, a: u8) -> TgaColor {
-    TgaColor {
-        bgra: [b, g, r, a],
-        bytespp: 4,
+impl Pixel {
+    fn write<W: WriteBytesExt>(p: &Self, w: &mut W) -> Result<()> {
+        for i in 0..4 {
+            try!(w.write_u8(p.bgra[i]));
+        }
+        Ok(())
     }
-}
-
-fn make_empty_v(v: u8) -> TgaColor {
-    TgaColor {
-        bgra: [0; 4],
-        bytespp: v,
-    }
-}
-
-enum Format {
-    GRAYSCALE,
-    RGB,
-    RGBA,
-}
-
-fn to_int(f: &Format) -> u8 {
-    match *f {
-        Format::GRAYSCALE => 1,
-        Format::RGB => 3,
-        Format::RGBA => 4,
-    }
-}
-
-struct TgaImage {
-    data: Vec<i8>,
-    width: i16,
-    height: i16,
-    bytespp: i16,
 }
