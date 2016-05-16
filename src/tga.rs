@@ -25,11 +25,11 @@ pub struct TgaColor {
 }
 
 impl TgaColor {
-    fn write<W: WriteBytesExt>(p: &Self, w: &mut W) -> Result<()> {
+    fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
         let mut i = 4;
         while i > 0 {
             i -= 1;
-            try!(w.write_u8(p.argb[i]));
+            try!(w.write_u8(self.argb[i]));
         }
         Ok(())
     }
@@ -56,19 +56,19 @@ impl Header {
         }
     }
 
-    fn write<W: WriteBytesExt>(h: &Self, w: &mut W) -> Result<()> {
-        try!(w.write_u8(h.id_length));
-        try!(w.write_u8(h.map_type));
-        try!(w.write_u8(h.image_type));
-        try!(w.write_u16::<LittleEndian>(h.map_origin));
-        try!(w.write_u16::<LittleEndian>(h.map_length));
-        try!(w.write_u8(h.map_entry_size));
-        try!(w.write_u16::<LittleEndian>(h.x_origin));
-        try!(w.write_u16::<LittleEndian>(h.y_origin));
-        try!(w.write_u16::<LittleEndian>(h.image_width));
-        try!(w.write_u16::<LittleEndian>(h.image_height));
-        try!(w.write_u8(h.pixel_depth));
-        try!(w.write_u8(h.image_desc));
+    fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
+        try!(w.write_u8(self.id_length));
+        try!(w.write_u8(self.map_type));
+        try!(w.write_u8(self.image_type));
+        try!(w.write_u16::<LittleEndian>(self.map_origin));
+        try!(w.write_u16::<LittleEndian>(self.map_length));
+        try!(w.write_u8(self.map_entry_size));
+        try!(w.write_u16::<LittleEndian>(self.x_origin));
+        try!(w.write_u16::<LittleEndian>(self.y_origin));
+        try!(w.write_u16::<LittleEndian>(self.image_width));
+        try!(w.write_u16::<LittleEndian>(self.image_height));
+        try!(w.write_u8(self.pixel_depth));
+        try!(w.write_u8(self.image_desc));
         Ok(())
     }
 }
@@ -80,8 +80,8 @@ pub struct TgaImage {
 }
 
 impl TgaImage {
-    pub fn new<'a>(w: usize, h: usize) -> TgaImage {
-        let c = TgaColor { argb: [0, 0, 0, 0] };
+    pub fn new(w: usize, h: usize) -> TgaImage {
+        let c = TgaColor { argb: [255, 0, 0, 0] };
         TgaImage {
             width: w,
             height: h,
@@ -90,11 +90,19 @@ impl TgaImage {
     }
 
     pub fn set(self: &mut Self, x: usize, y: usize, c: TgaColor) -> bool {
-        if x < 0 || y < 0 || x >= self.width || y >= self.width {
+        if x >= self.width || y >= self.width {
             false
         } else {
             self.data[(y, x)] = c;
             true
         }
+    }
+
+    pub fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
+        try!(Header::new(self.width as u16, self.height as u16).write(w));
+        for c in self.data.as_vector() {
+            try!(c.write(w));
+        }
+        Ok(())
     }
 }
