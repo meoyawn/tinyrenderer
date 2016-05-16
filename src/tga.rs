@@ -88,13 +88,8 @@ impl TgaImage {
         }
     }
 
-    pub fn set(self: &mut Self, x: usize, y: usize, c: TgaColor) -> bool {
-        if x >= self.width || y >= self.width {
-            false
-        } else {
-            self.data[(y, x)] = c;
-            true
-        }
+    pub fn set(self: &mut Self, x: usize, y: usize, c: TgaColor) -> () {
+        self.data[(y, x)] = c;
     }
 
     pub fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
@@ -103,5 +98,17 @@ impl TgaImage {
             try!(c.write(w));
         }
         Ok(())
+    }
+
+    pub fn flip_vertically(self: &mut Self) -> () {
+        let half = self.width / 2;
+        for i in 0..half {
+            let y = self.width - i - 1;
+            for j in 0..self.height {
+                let tmp = self.data[(j, i)];
+                self.data[(j, i)] = self.data[(j, y)];
+                self.data[(j, y)] = tmp;
+            }
+        }
     }
 }
