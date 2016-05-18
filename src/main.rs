@@ -1,5 +1,4 @@
 extern crate byteorder;
-extern crate nalgebra;
 
 mod tga;
 mod renderer;
@@ -19,6 +18,5 @@ fn main() {
     line(80, 40, 13, 20, &mut image, RED);
 
     let mut f = File::create("foo.tga").unwrap();
-    image.flip_vertically();
     image.write(&mut f).unwrap();
 }

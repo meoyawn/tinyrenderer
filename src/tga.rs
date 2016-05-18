@@ -1,6 +1,5 @@
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::io::Result;
-use nalgebra::DMatrix;
 
 /// Header used by TGA image files
 #[derive(Debug)]
@@ -72,43 +71,44 @@ impl Header {
     }
 }
 
-pub struct TgaImage {
+struct Matrix<T> {
     width: usize,
     height: usize,
-    data: DMatrix<TgaColor>,
+    vec: Vec<T>,
+}
+
+pub struct TgaImage {
+    m: Matrix<TgaColor>,
+}
+
+impl<T: Copy> Matrix<T> {
+    pub fn set(self: &mut Self, i: usize, j: usize, t: T) -> () {
+        self.vec[j * self.height + i] = t
+    }
+    fn get(self: &Self, i: usize, j: usize) -> T {
+        self.vec[j * self.height + i]
+    }
 }
 
 impl TgaImage {
     pub fn new(w: usize, h: usize) -> TgaImage {
         let c = TgaColor { rgba: [0, 0, 0, 255] };
         TgaImage {
-            width: w,
-            height: h,
-            data: DMatrix::from_element(h, w, c),
+            m: Matrix {
+                width: w,
+                height: h,
+                vec: vec![c; w * h],
+            },
         }
     }
-
-    pub fn set(self: &mut Self, x: usize, y: usize, c: TgaColor) -> () {
-        self.data[(y, x)] = c;
-    }
-
     pub fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
-        try!(Header::new(self.width as u16, self.height as u16).write(w));
-        for c in self.data.as_vector() {
+        try!(Header::new(self.m.width as u16, self.m.height as u16).write(w));
+        for c in &self.m.vec {
             try!(c.write(w));
         }
         Ok(())
     }
-
-    pub fn flip_vertically(self: &mut Self) -> () {
-        let half = self.width / 2;
-        for i in 0..half {
-            let y = self.width - i - 1;
-            for j in 0..self.height {
-                let tmp = self.data[(j, i)];
-                self.data[(j, i)] = self.data[(j, y)];
-                self.data[(j, y)] = tmp;
-            }
-        }
+    pub fn set(self: &mut Self, i: usize, j: usize, c: TgaColor) -> () {
+        self.m.set(i, j, c)
     }
 }

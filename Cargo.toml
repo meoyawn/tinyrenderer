@@ -5,4 +5,3 @@ authors = ["adelnizamutdinov <stiggpwnz@gmail.com>"]
 
 [dependencies]
 byteorder = "0.5"
-nalgebra = "0.8.0"
