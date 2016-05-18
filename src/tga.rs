@@ -25,10 +25,10 @@ pub struct TgaColor {
 
 impl TgaColor {
     fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
-        try!(w.write_u8(self.rgba[2]));
-        try!(w.write_u8(self.rgba[1]));
-        try!(w.write_u8(self.rgba[0]));
-        try!(w.write_u8(self.rgba[3]));
+        try!(w.write_u8(self.rgba[2])); // r
+        try!(w.write_u8(self.rgba[1])); // g
+        try!(w.write_u8(self.rgba[0])); // b
+        try!(w.write_u8(self.rgba[3])); // a
         Ok(())
     }
 }
@@ -53,7 +53,6 @@ impl Header {
             image_desc: 0,
         }
     }
-
     fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
         try!(w.write_u8(self.id_length));
         try!(w.write_u8(self.map_type));
