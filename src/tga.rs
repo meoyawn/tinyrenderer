@@ -71,44 +71,32 @@ impl Header {
     }
 }
 
-struct Matrix<T> {
+pub struct TgaImage {
     width: usize,
     height: usize,
-    vec: Vec<T>,
-}
-
-pub struct TgaImage {
-    m: Matrix<TgaColor>,
-}
-
-impl<T: Copy> Matrix<T> {
-    pub fn set(self: &mut Self, i: usize, j: usize, t: T) -> () {
-        self.vec[j * self.height + i] = t
-    }
-    fn get(self: &Self, i: usize, j: usize) -> T {
-        self.vec[j * self.height + i]
-    }
+    data: Vec<TgaColor>,
 }
 
 impl TgaImage {
     pub fn new(w: usize, h: usize) -> TgaImage {
         let c = TgaColor { rgba: [0, 0, 0, 255] };
         TgaImage {
-            m: Matrix {
-                width: w,
-                height: h,
-                vec: vec![c; w * h],
-            },
+            width: w,
+            height: h,
+            data: vec![c; w * h],
         }
     }
     pub fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
-        try!(Header::new(self.m.width as u16, self.m.height as u16).write(w));
-        for c in &self.m.vec {
+        try!(Header::new(self.width as u16, self.height as u16).write(w));
+        for c in &self.data {
             try!(c.write(w));
         }
         Ok(())
     }
-    pub fn set(self: &mut Self, i: usize, j: usize, c: TgaColor) -> () {
-        self.m.set(i, j, c)
+    pub fn set(self: &mut Self, i: usize, j: usize, t: TgaColor) -> () {
+        self.data[j * self.height + i] = t
+    }
+    fn get(self: &Self, i: usize, j: usize) -> TgaColor {
+        self.data[j * self.height + i]
     }
 }
