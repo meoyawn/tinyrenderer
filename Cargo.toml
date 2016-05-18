@@ -5,3 +5,4 @@ authors = ["adelnizamutdinov <stiggpwnz@gmail.com>"]
 
 [dependencies]
 byteorder = "0.5"
+wavefront_obj = "3.0.0"

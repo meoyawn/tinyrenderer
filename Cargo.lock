@@ -3,10 +3,16 @@ name = "tinyrenderer"
 version = "0.1.0"
 dependencies = [
  "byteorder 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wavefront_obj 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "byteorder"
 version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "wavefront_obj"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
