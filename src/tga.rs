@@ -17,7 +17,7 @@ struct Header {
     image_desc: u8,
 }
 
-#[derive(Clone)]
+#[derive(Clone,Copy)]
 pub struct TgaColor {
     pub bgra: [u8; 4],
 }

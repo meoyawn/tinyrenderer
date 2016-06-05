@@ -23,7 +23,7 @@ pub fn triangle(pts: [Vec2i; 3], image: &mut TgaImage, color: TgaColor) {
             if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
                 continue;
             }
-            image.set(p.x as usize, p.y as usize, color.clone());
+            image.set(p.x as usize, p.y as usize, color);
         }
     }
 }
@@ -57,11 +57,10 @@ pub fn line(x0: i32, y0: i32, x1: i32, y1: i32, image: &mut TgaImage, color: Tga
     let mut y = y0;
 
     for x in x0..x1 + 1 {
-        let c = color.clone();
         if steep {
-            image.set(y as usize, x as usize, c);
+            image.set(y as usize, x as usize, color);
         } else {
-            image.set(x as usize, y as usize, c);
+            image.set(x as usize, y as usize, color);
         }
         error2 += derror2;
         if error2 > dx {

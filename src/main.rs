@@ -37,12 +37,7 @@ fn head_lines(image: &mut TgaImage, color: TgaColor) {
                     let y0 = (v0[1] + 1f32) * f_height / 2f32;
                     let x1 = (v1[0] + 1f32) * f_width / 2f32;
                     let y1 = (v1[1] + 1f32) * f_height / 2f32;
-                    line(x0 as i32,
-                         y0 as i32,
-                         x1 as i32,
-                         y1 as i32,
-                         image,
-                         color.clone());
+                    line(x0 as i32, y0 as i32, x1 as i32, y1 as i32, image, color);
                 }
             }
         }
