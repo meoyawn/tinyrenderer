@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Index};
+use std::ops::{Add, Sub, Mul, Index, BitXor};
 
 pub struct Vec2i {
     pub x: i32,
@@ -60,6 +60,7 @@ impl Index<usize> for Vec2i {
     }
 }
 
+#[derive(Clone,Copy)]
 pub struct Vec3f {
     pub x: f32,
     pub y: f32,
@@ -73,19 +74,40 @@ impl Vec3f {
     pub fn newi32(x: i32, y: i32, z: i32) -> Vec3f {
         Vec3f::new(x as f32, y as f32, z as f32)
     }
+    fn norm(&self) -> f32 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+    pub fn normalize(&self) -> Vec3f {
+        let n = self.norm();
+        Vec3f::new(self.x / n, self.y / n, self.z / n)
+    }
 }
 
-impl Mul for Vec3f {
+impl Sub for Vec3f {
     type Output = Vec3f;
-    fn mul(self, rhs: Vec3f) -> Vec3f {
+    fn sub(self, rhs: Vec3f) -> Vec3f {
+        Vec3f::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl BitXor for Vec3f {
+    type Output = Vec3f;
+    fn bitxor(self, rhs: Vec3f) -> Vec3f {
         Vec3f::new(self.y * rhs.z - self.z * rhs.y,
                    self.z * rhs.x - self.x * rhs.z,
                    self.x * rhs.y - self.y * rhs.x)
     }
 }
 
+impl Mul for Vec3f {
+    type Output = f32;
+    fn mul(self, rhs: Vec3f) -> f32 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+}
+
 pub fn barycentric(pts: &[Vec2i; 3], p: &Vec2i) -> Vec3f {
-    let u = Vec3f::newi32(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - p.x) *
+    let u = Vec3f::newi32(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - p.x) ^
             Vec3f::newi32(pts[2].y - pts[0].y, pts[1].y - pts[0].y, pts[0].y - p.y);
     if u.z.abs() < 1f32 {
         return Vec3f::new(-1f32, 1f32, 1f32);

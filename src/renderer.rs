@@ -2,7 +2,6 @@ use tga::{TgaImage, TgaColor};
 use std::mem::swap;
 use geometry::{Vec2i, barycentric};
 use std::cmp::{max, min};
-use rand::random;
 
 pub fn triangle(pts: [Vec2i; 3], image: &mut TgaImage, color: TgaColor) {
     let mut bboxmin = Vec2i::new(image.width as i32 - 1, image.height as i32 - 1);
@@ -29,7 +28,7 @@ pub fn triangle(pts: [Vec2i; 3], image: &mut TgaImage, color: TgaColor) {
     }
 }
 
-fn pLine(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage, color: TgaColor) {
+fn v_line(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage, color: TgaColor) {
     line(v1.x, v1.y, v2.x, v2.y, image, color)
 }
 
