@@ -9,6 +9,12 @@ impl Vec2i {
     pub fn new(x: i32, y: i32) -> Vec2i {
         Vec2i { x: x, y: y }
     }
+    pub fn newf32(x: f32, y: f32) -> Vec2i {
+        Vec2i {
+            x: x as i32,
+            y: y as i32,
+        }
+    }
     pub fn index_set(&mut self, index: usize, v: i32) {
         match index {
             0 => self.x = v,

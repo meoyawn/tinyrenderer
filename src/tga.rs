@@ -1,7 +1,7 @@
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::io::{Result, Write};
 
-/// Header used by TGA image files
+// Header used by TGA image files
 struct Header {
     id_length: u8,
     map_type: u8,
@@ -17,6 +17,7 @@ struct Header {
     image_desc: u8,
 }
 
+#[derive(Clone)]
 pub struct TgaColor {
     pub bgra: [u8; 4],
 }
@@ -64,18 +65,20 @@ impl Header {
     }
 }
 
-pub struct TgaImage<'a> {
+pub struct TgaImage {
     pub width: usize,
     pub height: usize,
-    data: Vec<&'a TgaColor>,
+    data: Vec<TgaColor>,
 }
 
-impl<'a> TgaImage<'a> {
-    pub fn new<'b>(w: usize, h: usize, c: &'b TgaColor) -> TgaImage<'b> {
+const BLACK: TgaColor = TgaColor { bgra: [0, 0, 0, 255] };
+
+impl TgaImage {
+    pub fn new(w: usize, h: usize) -> TgaImage {
         TgaImage {
             width: w,
             height: h,
-            data: vec![c; w * h],
+            data: vec![BLACK; w * h],
         }
     }
     pub fn write<W: Write>(&self, w: &mut W) -> Result<()> {
@@ -85,7 +88,7 @@ impl<'a> TgaImage<'a> {
         }
         Ok(())
     }
-    pub fn set(&mut self, i: usize, j: usize, t: &'a TgaColor) -> () {
+    pub fn set(&mut self, i: usize, j: usize, t: TgaColor) -> () {
         if i < self.height && j < self.width {
             self.data[j * self.height + i] = t
         }

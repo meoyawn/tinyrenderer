@@ -2,8 +2,9 @@ use tga::{TgaImage, TgaColor};
 use std::mem::swap;
 use geometry::{Vec2i, barycentric};
 use std::cmp::{max, min};
+use rand::random;
 
-pub fn triangle<'a>(pts: [Vec2i; 3], image: &mut TgaImage<'a>, color: &'a TgaColor) {
+pub fn triangle(pts: [Vec2i; 3], image: &mut TgaImage, color: TgaColor) {
     let mut bboxmin = Vec2i::new(image.width as i32 - 1, image.height as i32 - 1);
     let mut bboxmax = Vec2i::new(0, 0);
     let clamp = Vec2i::new(image.width as i32 - 1, image.height as i32 - 1);
@@ -23,22 +24,16 @@ pub fn triangle<'a>(pts: [Vec2i; 3], image: &mut TgaImage<'a>, color: &'a TgaCol
             if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
                 continue;
             }
-            image.set(p.x as usize, p.y as usize, color);
+            image.set(p.x as usize, p.y as usize, color.clone());
         }
     }
 }
 
-fn pLine<'a>(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage<'a>, color: &'a TgaColor) {
+fn pLine(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage, color: TgaColor) {
     line(v1.x, v1.y, v2.x, v2.y, image, color)
 }
 
-pub fn line<'a>(x0: i32,
-                y0: i32,
-                x1: i32,
-                y1: i32,
-                image: &mut TgaImage<'a>,
-                color: &'a TgaColor)
-                -> () {
+pub fn line(x0: i32, y0: i32, x1: i32, y1: i32, image: &mut TgaImage, color: TgaColor) -> () {
     let mut steep = false;
 
     let mut x0 = x0;
@@ -63,10 +58,11 @@ pub fn line<'a>(x0: i32,
     let mut y = y0;
 
     for x in x0..x1 + 1 {
+        let c = color.clone();
         if steep {
-            image.set(y as usize, x as usize, color);
+            image.set(y as usize, x as usize, c);
         } else {
-            image.set(x as usize, y as usize, color);
+            image.set(x as usize, y as usize, c);
         }
         error2 += derror2;
         if error2 > dx {

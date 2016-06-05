@@ -6,3 +6,4 @@ authors = ["adelnizamutdinov <stiggpwnz@gmail.com>"]
 [dependencies]
 byteorder = "0.5"
 obj = "0.5.0"
+rand = "0.3"
