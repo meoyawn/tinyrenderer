@@ -3,18 +3,18 @@ use std::io::{Result, Write};
 
 /// Header used by TGA image files
 struct Header {
-    id_length: u8, // length of ID string
-    map_type: u8, // color map type
-    image_type: u8, // image type code
-    map_origin: u16, // starting index of map
-    map_length: u16, // length of map
-    map_entry_size: u8, // size of map entries in bits
-    x_origin: u16, // x-origin of image
-    y_origin: u16, // y-origin of image
-    image_width: u16, // width of image
-    image_height: u16, // height of image
-    pixel_depth: u8, // bits per pixel
-    image_desc: u8, // image descriptor
+    id_length: u8,
+    map_type: u8,
+    image_type: u8,
+    map_origin: u16,
+    map_length: u16,
+    map_entry_size: u8,
+    x_origin: u16,
+    y_origin: u16,
+    image_width: u16,
+    image_height: u16,
+    pixel_depth: u8,
+    image_desc: u8,
 }
 
 pub struct TgaColor {
