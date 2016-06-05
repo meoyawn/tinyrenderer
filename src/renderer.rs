@@ -1,15 +1,21 @@
 use tga::{TgaImage, TgaColor};
 use std::mem::swap;
 
-pub fn line(x0: u16, y0: u16, x1: u16, y1: u16, image: &mut TgaImage, color: TgaColor) -> () {
+pub fn line<'a>(x0: i32,
+                y0: i32,
+                x1: i32,
+                y1: i32,
+                image: &mut TgaImage<'a>,
+                color: &'a TgaColor)
+                -> () {
     let mut steep = false;
 
-    let mut finx0 = x0 as i32;
-    let mut finx1 = x1 as i32;
-    let mut finy0 = y0 as i32;
-    let mut finy1 = y1 as i32;
+    let mut finx0 = x0;
+    let mut finx1 = x1;
+    let mut finy0 = y0;
+    let mut finy1 = y1;
 
-    if (x0 as i32 - x1 as i32).abs() < (y0 as i32 - y1 as i32).abs() {
+    if (x0 - x1).abs() < (y0 - y1).abs() {
         swap(&mut finx0, &mut finy0);
         swap(&mut finx1, &mut finy1);
         steep = true;
@@ -33,7 +39,7 @@ pub fn line(x0: u16, y0: u16, x1: u16, y1: u16, image: &mut TgaImage, color: Tga
         }
         error2 += derror2;
         if error2 > dx {
-            y += if y1 > y0 {
+            y += if finy1 > finy0 {
                 1
             } else {
                 -1
