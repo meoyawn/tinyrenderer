@@ -9,7 +9,7 @@ mod geometry;
 use tga::*;
 use std::fs::File;
 use renderer::*;
-use geometry::Point;
+use geometry::Vec2i;
 use std::path::Path;
 use obj::*;
 use std::rc::Rc;
@@ -55,13 +55,13 @@ fn main() {
 
     // draw_head(&mut image, w);
 
-    let t0 = [Point::new(10, 70), Point::new(50, 160), Point::new(70, 80)];
-    let t1 = [Point::new(180, 50), Point::new(150, 1), Point::new(70, 180)];
-    let t2 = [Point::new(180, 150), Point::new(120, 160), Point::new(130, 180)];
+    let t0 = [Vec2i::new(10, 70), Vec2i::new(50, 160), Vec2i::new(70, 80)];
+    let t1 = [Vec2i::new(180, 50), Vec2i::new(150, 1), Vec2i::new(70, 180)];
+    let t2 = [Vec2i::new(180, 150), Vec2i::new(120, 160), Vec2i::new(130, 180)];
 
-    triangle(t0[0], t0[1], t0[2], &mut image, r);
-    triangle(t1[0], t1[1], t1[2], &mut image, w);
-    triangle(t2[0], t2[1], t2[2], &mut image, g);
+    triangle(t0, &mut image, r);
+    triangle(t1, &mut image, w);
+    triangle(t2, &mut image, g);
 
     let mut f = File::create("foo.tga").unwrap();
     image.write(&mut f).unwrap();

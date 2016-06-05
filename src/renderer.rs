@@ -1,61 +1,34 @@
 use tga::{TgaImage, TgaColor};
 use std::mem::swap;
-use geometry::Point;
+use geometry::{Vec2i, barycentric};
+use std::cmp::{max, min};
 
-pub fn triangle<'a>(t0: Point,
-                    t1: Point,
-                    t2: Point,
-                    image: &mut TgaImage<'a>,
-                    color: &'a TgaColor) {
-    if t0.y == t1.y && t0.y == t2.y {
-        return;
-    }
-
-    let mut t0 = t0;
-    let mut t1 = t1;
-    let mut t2 = t2;
-
-    if t0.y > t1.y {
-        swap(&mut t0, &mut t1);
-    }
-    if t0.y > t2.y {
-        swap(&mut t0, &mut t2);
-    }
-    if t1.y > t2.y {
-        swap(&mut t1, &mut t2);
-    }
-
-    let total_height = t2.y - t0.y;
-    for i in 0..total_height {
-        let second_half = i > (t1.y - t0.y) || t1.y == t0.y;
-        let segment_height = if second_half {
-            t2.y - t1.y
-        } else {
-            t1.y - t0.y
-        };
-        let alpha = i as f32 / total_height as f32;
-        let mns = if second_half {
-            t1.y - t0.y
-        } else {
-            0
-        };
-        let beta = (i - mns) as f32 / segment_height as f32;
-        let mut a = t0 + (t2 - t0) * alpha;
-        let mut b = if second_half {
-            t1 + (t2 - t1) * beta
-        } else {
-            t0 + (t1 - t0) * beta
-        };
-        if a.x > b.x {
-            swap(&mut a, &mut b);
+pub fn triangle<'a>(pts: [Vec2i; 3], image: &mut TgaImage<'a>, color: &'a TgaColor) {
+    let mut bboxmin = Vec2i::new(image.width as i32 - 1, image.height as i32 - 1);
+    let mut bboxmax = Vec2i::new(0, 0);
+    let clamp = Vec2i::new(image.width as i32 - 1, image.height as i32 - 1);
+    for i in 0..3 {
+        for j in 0..2 {
+            let m = bboxmin[j];
+            bboxmin.index_set(j, max(0, min(m, pts[i][j])));
+            let m = bboxmax[j];
+            bboxmax.index_set(j, min(clamp[j], max(m, pts[i][j])));
         }
-        for j in a.x..b.x + 1 {
-            image.set(j as usize, (t0.y + i) as usize, color);
+    }
+    let mut p = Vec2i::new(0, 0);
+    for i in bboxmin.x..bboxmax.x + 1 {
+        for j in bboxmin.y..bboxmax.y + 1 {
+            p.set(i, j);
+            let bc_screen = barycentric(&pts, &p);
+            if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
+                continue;
+            }
+            image.set(p.x as usize, p.y as usize, color);
         }
     }
 }
 
-fn pLine<'a>(v1: &Point, v2: &Point, image: &mut TgaImage<'a>, color: &'a TgaColor) {
+fn pLine<'a>(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage<'a>, color: &'a TgaColor) {
     line(v1.x, v1.y, v2.x, v2.y, image, color)
 }
 

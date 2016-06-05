@@ -65,8 +65,8 @@ impl Header {
 }
 
 pub struct TgaImage<'a> {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     data: Vec<&'a TgaColor>,
 }
 
