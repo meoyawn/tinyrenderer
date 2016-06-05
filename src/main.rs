@@ -8,7 +8,7 @@ mod renderer;
 use tga::*;
 use std::fs::File;
 use renderer::line;
-use std::path::*;
+use std::path::Path;
 use obj::*;
 use std::rc::Rc;
 

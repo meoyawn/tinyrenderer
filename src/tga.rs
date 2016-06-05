@@ -22,7 +22,7 @@ pub struct TgaColor {
 }
 
 impl TgaColor {
-    fn write<W: Write>(self: &Self, w: &mut W) -> Result<usize> {
+    fn write<W: Write>(&self, w: &mut W) -> Result<usize> {
         w.write(&self.rgba)
     }
 }
@@ -47,7 +47,7 @@ impl Header {
             image_desc: 0,
         }
     }
-    fn write<W: WriteBytesExt>(self: &Self, w: &mut W) -> Result<()> {
+    fn write<W: WriteBytesExt>(&self, w: &mut W) -> Result<()> {
         try!(w.write_u8(self.id_length));
         try!(w.write_u8(self.map_type));
         try!(w.write_u8(self.image_type));
@@ -85,7 +85,7 @@ impl<'a> TgaImage<'a> {
         }
         Ok(())
     }
-    pub fn set(self: &mut Self, i: usize, j: usize, t: &'a TgaColor) -> () {
+    pub fn set(&mut self, i: usize, j: usize, t: &'a TgaColor) -> () {
         if i < self.height && j < self.width {
             self.data[j * self.height + i] = t
         }
