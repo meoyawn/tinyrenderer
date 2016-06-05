@@ -18,12 +18,12 @@ struct Header {
 }
 
 pub struct TgaColor {
-    pub rgba: [u8; 4],
+    pub bgra: [u8; 4],
 }
 
 impl TgaColor {
     fn write<W: Write>(&self, w: &mut W) -> Result<usize> {
-        w.write(&self.rgba)
+        w.write(&self.bgra)
     }
 }
 
