@@ -29,9 +29,7 @@ fn main() {
     let verts = obj.position();
     for o in obj.object_iter() {
         for g in o.group_iter() {
-            let is = g.indices();
-            println!("{:?}", is.len());
-            for tups in is {
+            for tups in g.indices() {
                 let face = tups.iter().map(|&(i, _, _)| i).collect::<Vec<_>>();
                 for j in 0..3 {
                     let v0 = verts[face[j]];
