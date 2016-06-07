@@ -90,6 +90,7 @@ impl Sub for Vec3f {
     }
 }
 
+// cross product
 impl BitXor for Vec3f {
     type Output = Vec3f;
     fn bitxor(self, rhs: Vec3f) -> Vec3f {
@@ -99,6 +100,7 @@ impl BitXor for Vec3f {
     }
 }
 
+// dot product
 impl Mul for Vec3f {
     type Output = f32;
     fn mul(self, rhs: Vec3f) -> f32 {
