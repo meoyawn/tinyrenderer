@@ -88,9 +88,9 @@ impl TgaImage {
         }
         Ok(())
     }
-    pub fn set(&mut self, i: usize, j: usize, t: TgaColor) -> () {
-        if i < self.height && j < self.width {
-            self.data[j * self.height + i] = t
+    pub fn set(&mut self, x: usize, y: usize, t: TgaColor) -> () {
+        if x < self.width && y < self.height {
+            self.data[y * self.width + x] = t
         }
     }
 }

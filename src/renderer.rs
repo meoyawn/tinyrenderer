@@ -28,8 +28,31 @@ pub fn triangle(pts: [Vec2i; 3], image: &mut TgaImage, color: TgaColor) {
     }
 }
 
-fn v_line(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage, color: TgaColor) {
+pub fn v_line(v1: &Vec2i, v2: &Vec2i, image: &mut TgaImage, color: TgaColor) {
     line(v1.x, v1.y, v2.x, v2.y, image, color)
+}
+
+pub fn rasterize(p0: &Vec2i,
+                 p1: &Vec2i,
+                 image: &mut TgaImage,
+                 color: TgaColor,
+                 y_buffer: &mut Vec<i32>) {
+    let mut p0 = p0;
+    let mut p1 = p1;
+    if p0.x > p1.x {
+        swap(&mut p0, &mut p1);
+    }
+    for x in p0.x..p1.x + 1 {
+        let t = (x - p0.x) as f32 / (p1.x - p0.x) as f32;
+        let y = (p0.y as f32 * (1f32 - t) + p1.y as f32 * t) as i32;
+        let idx = x as usize;
+        if y_buffer[idx] < y {
+            y_buffer[idx] = y;
+            for i in 0..16 {
+                image.set(idx, i, color);
+            }
+        }
+    }
 }
 
 pub fn line(x0: i32, y0: i32, x1: i32, y1: i32, image: &mut TgaImage, color: TgaColor) -> () {

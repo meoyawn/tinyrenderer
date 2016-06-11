@@ -17,6 +17,7 @@ use std::rc::Rc;
 const WHITE: TgaColor = TgaColor { bgra: [255, 255, 255, 255] };
 const RED: TgaColor = TgaColor { bgra: [0, 0, 255, 255] };
 const GREEN: TgaColor = TgaColor { bgra: [0, 255, 0, 255] };
+const BLUE: TgaColor = TgaColor { bgra: [255, 0, 0, 255] };
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 800;
@@ -42,6 +43,37 @@ fn head_lines(image: &mut TgaImage, color: TgaColor) {
             }
         }
     }
+}
+
+fn two_dimensions(image: &mut TgaImage) {
+    v_line(&Vec2i::new(20, 34), &Vec2i::new(744, 400), image, RED);
+    v_line(&Vec2i::new(120, 434), &Vec2i::new(444, 400), image, GREEN);
+    v_line(&Vec2i::new(330, 463), &Vec2i::new(594, 200), image, BLUE);
+
+    v_line(&Vec2i::new(10, 10), &Vec2i::new(790, 10), image, WHITE);
+}
+
+fn rasterized() {
+    let mut image = TgaImage::new(WIDTH, 16);
+    let mut y_buffer = vec![std::i32::MIN; WIDTH];
+    rasterize(&Vec2i::new(20, 34),
+              &Vec2i::new(744, 400),
+              &mut image,
+              RED,
+              &mut y_buffer);
+    rasterize(&Vec2i::new(120, 434),
+              &Vec2i::new(444, 400),
+              &mut image,
+              GREEN,
+              &mut y_buffer);
+    rasterize(&Vec2i::new(330, 463),
+              &Vec2i::new(594, 200),
+              &mut image,
+              BLUE,
+              &mut y_buffer);
+
+    let mut f = File::create("render.tga").unwrap();
+    image.write(&mut f).unwrap();
 }
 
 fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
@@ -79,9 +111,12 @@ fn main() {
 
     // head_lines(&mut image, w);
     head_triangles(&mut image, Vec3f::new(0f32, 0f32, -1f32));
+    // two_dimensions(&mut image);
 
     let mut f = File::create("foo.tga").unwrap();
     image.write(&mut f).unwrap();
+
+    rasterized();
 }
 
 fn head() -> Obj<Rc<Material>, SimplePolygon> {
