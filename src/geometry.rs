@@ -1,8 +1,50 @@
-use std::ops::{Add, Sub, Mul, Index, BitXor};
+use std::ops::{Add, Sub, Mul, Index, BitXor, IndexMut};
 
 pub struct Vec2i {
     pub x: i32,
     pub y: i32,
+}
+
+pub struct Vec2f {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Index<usize> for Vec2f {
+    type Output = f32;
+    fn index(&self, index: usize) -> &f32 {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            _ => panic!("exhaust"),
+        }
+    }
+}
+
+impl IndexMut<usize> for Vec2f {
+    fn index_mut(&mut self, index: usize) -> &mut f32 {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            _ => panic!("exhaust"),
+        }
+    }
+}
+
+impl IndexMut<usize> for Vec2i {
+    fn index_mut(&mut self, index: usize) -> &mut i32 {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            _ => panic!("exhaust"),
+        }
+    }
+}
+
+impl Vec2f {
+    pub fn new(x: f32, y: f32) -> Vec2f {
+        Vec2f { x: x, y: y }
+    }
 }
 
 impl Vec2i {
@@ -13,13 +55,6 @@ impl Vec2i {
         Vec2i {
             x: x as i32,
             y: y as i32,
-        }
-    }
-    pub fn index_set(&mut self, index: usize, v: i32) {
-        match index {
-            0 => self.x = v,
-            1 => self.y = v,
-            _ => panic!("exhaust"),
         }
     }
     pub fn set(&mut self, x: i32, y: i32) {
@@ -81,6 +116,22 @@ impl Vec3f {
         let n = self.norm();
         Vec3f::new(self.x / n, self.y / n, self.z / n)
     }
+    pub fn set(&mut self, x: i32, y: i32) {
+        self.x = x as f32;
+        self.y = y as f32;
+    }
+}
+
+impl Index<usize> for Vec3f {
+    type Output = f32;
+    fn index(&self, index: usize) -> &f32 {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("exhaust"),
+        }
+    }
 }
 
 impl Sub for Vec3f {
@@ -108,11 +159,16 @@ impl Mul for Vec3f {
     }
 }
 
-pub fn barycentric(pts: &[Vec2i; 3], p: &Vec2i) -> Vec3f {
-    let u = Vec3f::newi32(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - p.x) ^
-            Vec3f::newi32(pts[2].y - pts[0].y, pts[1].y - pts[0].y, pts[0].y - p.y);
-    if u.z.abs() < 1f32 {
-        return Vec3f::new(-1f32, 1f32, 1f32);
+pub fn barycentric(a: &Vec3f, b: &Vec3f, c: &Vec3f, p: &Vec3f) -> Vec3f {
+    let mut s = [Vec3f::new(0f32, 0f32, 0f32); 2];
+    for i in (0..2).rev() {
+        s[i][0] = c[i] - a[i];
+        s[i][1] = b[i] - a[i];
+        s[i][2] = a[i] - p[i];
     }
-    Vec3f::new(1f32 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z)
+    let u = s[0] ^ s[1];
+    if u[2].abs() > 1e-2 {
+        return Vec3f::new(1f32 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+    }
+    Vec3f::new(-1f32, 1f32, 1f32)
 }
