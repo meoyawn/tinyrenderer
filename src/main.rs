@@ -13,6 +13,7 @@ use geometry::{Vec2i, Vec3f};
 use std::path::Path;
 use obj::*;
 use std::rc::Rc;
+use std::f32;
 
 const WHITE: TgaColor = TgaColor { bgra: [255, 255, 255, 255] };
 const RED: TgaColor = TgaColor { bgra: [0, 0, 255, 255] };
@@ -45,53 +46,25 @@ fn head_lines(image: &mut TgaImage, color: TgaColor) {
     }
 }
 
-fn two_dimensions(image: &mut TgaImage) {
-    v_line(&Vec2i::new(20, 34), &Vec2i::new(744, 400), image, RED);
-    v_line(&Vec2i::new(120, 434), &Vec2i::new(444, 400), image, GREEN);
-    v_line(&Vec2i::new(330, 463), &Vec2i::new(594, 200), image, BLUE);
-
-    v_line(&Vec2i::new(10, 10), &Vec2i::new(790, 10), image, WHITE);
-}
-
-fn rasterized() {
-    let mut image = TgaImage::new(WIDTH, 16);
-    let mut y_buffer = vec![std::i32::MIN; WIDTH];
-    rasterize(&Vec2i::new(20, 34),
-              &Vec2i::new(744, 400),
-              &mut image,
-              RED,
-              &mut y_buffer);
-    rasterize(&Vec2i::new(120, 434),
-              &Vec2i::new(444, 400),
-              &mut image,
-              GREEN,
-              &mut y_buffer);
-    rasterize(&Vec2i::new(330, 463),
-              &Vec2i::new(594, 200),
-              &mut image,
-              BLUE,
-              &mut y_buffer);
-
-    let mut f = File::create("render.tga").unwrap();
-    image.write(&mut f).unwrap();
-}
-
 fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
     let obj = head();
     let verts = obj.position();
+    let mut zbuffer = vec![-f32::MAX; WIDTH*HEIGHT];
     for o in obj.object_iter() {
         for g in o.group_iter() {
             for tups in g.indices() {
                 let face = tups.iter().map(|&(i, _, _)| i).collect::<Vec<_>>();
-                let mut screen_coords = [Vec2i::new(0, 0), Vec2i::new(0, 0), Vec2i::new(0, 0)];
+                let mut screen_coords =
+                    [Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0)];
                 let mut world_coords =
                     [Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0)];
                 for j in 0..3 {
                     let v = verts[face[j]];
                     let f_width = WIDTH as f32;
                     let f_height = HEIGHT as f32;
-                    screen_coords[j] = Vec2i::newf32((v[0] + 1f32) * f_width / 2f32,
-                                                     (v[1] + 1f32) * f_height / 2f32);
+                    screen_coords[j] = Vec3f::new((v[0] + 1f32) * f_width / 2f32,
+                                                  (v[1] + 1f32) * f_height / 2f32,
+                                                  v[2]);
                     world_coords[j] = Vec3f::new(v[0], v[1], v[2]);
                 }
                 let n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
@@ -99,7 +72,10 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                 let intensity = n * light_dir;
                 if intensity > 0f32 {
                     let c = (intensity * 255f32) as u8;
-                    triangle(screen_coords, image, TgaColor { bgra: [c, c, c, 255] });
+                    triangle(screen_coords,
+                             &mut zbuffer,
+                             image,
+                             TgaColor { bgra: [c, c, c, 255] });
                 }
             }
         }
@@ -108,15 +84,10 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
 
 fn main() {
     let mut image = TgaImage::new(WIDTH, HEIGHT);
-
-    // head_lines(&mut image, w);
     head_triangles(&mut image, Vec3f::new(0f32, 0f32, -1f32));
-    // two_dimensions(&mut image);
 
     let mut f = File::create("foo.tga").unwrap();
     image.write(&mut f).unwrap();
-
-    rasterized();
 }
 
 fn head() -> Obj<Rc<Material>, SimplePolygon> {

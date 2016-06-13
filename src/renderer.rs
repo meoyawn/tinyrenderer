@@ -4,7 +4,7 @@ use geometry::*;
 use std::cmp::{max, min};
 use std::f32;
 
-pub fn triangle(pts: [Vec2f; 3], zbuffer: &mut Vec<f32>, image: &mut TgaImage, color: TgaColor) {
+pub fn triangle(pts: [Vec3f; 3], zbuffer: &mut Vec<f32>, image: &mut TgaImage, color: TgaColor) {
     let mut bboxmin = Vec2f::new(f32::MAX, f32::MAX);
     let mut bboxmax = Vec2f::new(-f32::MAX, -f32::MAX);
     let clamp = Vec2f::new(image.width as f32 - 1f32, image.height as f32 - 1f32);

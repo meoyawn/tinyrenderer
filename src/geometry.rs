@@ -31,6 +31,17 @@ impl IndexMut<usize> for Vec2f {
     }
 }
 
+impl IndexMut<usize> for Vec3f {
+    fn index_mut(&mut self, index: usize) -> &mut f32 {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => panic!("exhaust"),
+        }
+    }
+}
+
 impl IndexMut<usize> for Vec2i {
     fn index_mut(&mut self, index: usize) -> &mut i32 {
         match index {
