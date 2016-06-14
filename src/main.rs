@@ -1,6 +1,7 @@
 extern crate byteorder;
 extern crate core;
 extern crate obj;
+extern crate image;
 
 mod tga;
 mod renderer;
@@ -9,11 +10,13 @@ mod geometry;
 use tga::*;
 use std::fs::File;
 use renderer::*;
-use geometry::{Vec2i, Vec3f};
+use geometry::Vec3f;
 use std::path::Path;
 use obj::*;
 use std::rc::Rc;
 use std::f32;
+
+use image::RgbaImage;
 
 const WHITE: TgaColor = TgaColor { bgra: [255, 255, 255, 255] };
 const RED: TgaColor = TgaColor { bgra: [0, 0, 255, 255] };
@@ -48,7 +51,12 @@ fn head_lines(image: &mut TgaImage, color: TgaColor) {
 
 fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
     let obj = head();
+    let texture = texture();
+
+    println!("{:?}", texture.height());
+
     let verts = obj.position();
+    let textures = obj.texture();
     let mut zbuffer = vec![-f32::MAX; WIDTH*HEIGHT];
     for o in obj.object_iter() {
         for g in o.group_iter() {
@@ -66,6 +74,9 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                                                   (v[1] + 1f32) * f_height / 2f32,
                                                   v[2]);
                     world_coords[j] = Vec3f::new(v[0], v[1], v[2]);
+
+                    let (_, x, _) = tups[j];
+                    // println!("{:?}", textures[x.unwrap()]);
                 }
                 let n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
                 let n = n.normalize();
@@ -93,4 +104,8 @@ fn main() {
 fn head() -> Obj<Rc<Material>, SimplePolygon> {
     let f = load::<SimplePolygon>(Path::new("obj/african_head/african_head.obj"));
     f.unwrap()
+}
+
+fn texture() -> RgbaImage {
+    image::open(&Path::new("obj/african_head/african_head_diffuse.tga")).unwrap().to_rgba()
 }
