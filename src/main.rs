@@ -10,7 +10,7 @@ mod geometry;
 use tga::*;
 use std::fs::File;
 use renderer::*;
-use geometry::Vec3f;
+use geometry::{Vec2f, Vec3f};
 use std::path::Path;
 use obj::*;
 use std::rc::Rc;
@@ -53,8 +53,6 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
     let obj = head();
     let texture = texture();
 
-    println!("{:?}", texture.height());
-
     let verts = obj.position();
     let textures = obj.texture();
     let mut zbuffer = vec![-f32::MAX; WIDTH*HEIGHT];
@@ -66,6 +64,7 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                     [Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0)];
                 let mut world_coords =
                     [Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0)];
+                let mut txts = vec![Vec2f::new(0f32,0f32);3];
                 for j in 0..3 {
                     let v = verts[face[j]];
                     let f_width = WIDTH as f32;
@@ -76,7 +75,9 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                     world_coords[j] = Vec3f::new(v[0], v[1], v[2]);
 
                     let (_, x, _) = tups[j];
-                    // println!("{:?}", textures[x.unwrap()]);
+                    let txt = textures[x.unwrap()];
+                    txts[j].x = txt[0];
+                    txts[j].y = txt[1];
                 }
                 let n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
                 let n = n.normalize();
@@ -86,7 +87,9 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                     triangle(screen_coords,
                              &mut zbuffer,
                              image,
-                             TgaColor { bgra: [c, c, c, 255] });
+                             TgaColor { bgra: [c, c, c, 255] },
+                             &texture,
+                             &txts);
                 }
             }
         }

@@ -5,6 +5,7 @@ pub struct Vec2i {
     pub y: i32,
 }
 
+#[derive(Clone)]
 pub struct Vec2f {
     pub x: f32,
     pub y: f32,
@@ -106,7 +107,7 @@ impl Index<usize> for Vec2i {
     }
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy,Debug)]
 pub struct Vec3f {
     pub x: f32,
     pub y: f32,

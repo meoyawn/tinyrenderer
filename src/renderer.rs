@@ -1,10 +1,15 @@
 use tga::{TgaImage, TgaColor};
 use std::mem::swap;
 use geometry::*;
-use std::cmp::{max, min};
 use std::f32;
+use image::RgbaImage;
 
-pub fn triangle(pts: [Vec3f; 3], zbuffer: &mut Vec<f32>, image: &mut TgaImage, color: TgaColor) {
+pub fn triangle(pts: [Vec3f; 3],
+                zbuffer: &mut Vec<f32>,
+                image: &mut TgaImage,
+                color: TgaColor,
+                texture: &RgbaImage,
+                txts: &Vec<Vec2f>) {
     let mut bboxmin = Vec2f::new(f32::MAX, f32::MAX);
     let mut bboxmax = Vec2f::new(-f32::MAX, -f32::MAX);
     let clamp = Vec2f::new(image.width as f32 - 1f32, image.height as f32 - 1f32);
@@ -14,12 +19,27 @@ pub fn triangle(pts: [Vec3f; 3], zbuffer: &mut Vec<f32>, image: &mut TgaImage, c
             bboxmax[j] = clamp[j].min(bboxmax[j].max(pts[i][j]));
         }
     }
+
+    let mut tbboxmin = Vec2f::new(f32::MAX, f32::MAX);
+    let mut tbboxmax = Vec2f::new(f32::MIN, f32::MIN);
+    for i in 0..3 {
+        for j in 0..2 {
+            tbboxmin[j] = tbboxmin[j].min(txts[i][j]);
+            tbboxmax[j] = tbboxmax[j].max(txts[i][j]);
+        }
+    }
+    let tx_jump = (tbboxmax.x - tbboxmin.x) / (bboxmax.x - bboxmin.x);
+    let ty_jump = (tbboxmax.y - tbboxmin.y) / (bboxmax.y - bboxmin.y);
+
+    let mut tx = tbboxmin.x;
+    let mut ty = tbboxmin.y;
     let mut p = Vec3f::new(0f32, 0f32, 0f32);
     let width = image.width;
     for i in bboxmin.x as i32..bboxmax.x as i32 + 1 {
         for j in bboxmin.y as i32..bboxmax.y as i32 + 1 {
             p.set(i, j);
             let bc_screen = barycentric(&pts[0], &pts[1], &pts[2], &p);
+
             if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
                 continue;
             }
@@ -29,12 +49,23 @@ pub fn triangle(pts: [Vec3f; 3], zbuffer: &mut Vec<f32>, image: &mut TgaImage, c
                 p.z += pts[k][2] * bc_screen[k];
             }
 
+            let tw = texture.width() as f32;
+            let th = texture.height() as f32;
+            let xx = (tx * tw).min(tw - 1f32);
+            let xy = (ty * th).min(th - 1f32);
+            let text = texture[(xx as u32, xy as u32)];
+
             let idx = (p.x + p.y * width as f32) as usize;
             if zbuffer[idx] < p.z {
                 zbuffer[idx] = p.z;
-                image.set(p.x as usize, p.y as usize, color);
+                image.set(p.x as usize,
+                          p.y as usize,
+                          TgaColor { bgra: [text[2], text[1], text[0], text[3]] });
             }
+
+            tx += tx_jump;
         }
+        ty += ty_jump;
     }
 }
 
