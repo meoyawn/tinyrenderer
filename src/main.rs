@@ -15,19 +15,11 @@ use std::path::Path;
 use obj::*;
 use std::rc::Rc;
 use std::i32;
-use image::{open, ImageResult, RgbaImage};
-
-const WHITE: TgaColor = TgaColor { bgra: [255, 255, 255, 255] };
-const RED: TgaColor = TgaColor { bgra: [0, 0, 255, 255] };
-const GREEN: TgaColor = TgaColor { bgra: [0, 255, 0, 255] };
-const BLUE: TgaColor = TgaColor { bgra: [255, 0, 0, 255] };
+use image::{open, RgbaImage};
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 800;
-
-fn uv(face: Vec<usize>, nvert: usize) -> usize {
-    face[nvert]
-}
+const DEPTH: usize = 255;
 
 fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
     let obj = head();
@@ -44,17 +36,20 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                 let face = tups.iter().map(|&(i, _, _)| i).collect::<Vec<_>>();
                 let text = tups.iter().map(|&(_, i, _)| i.unwrap()).collect::<Vec<_>>();
 
+                let f_width = WIDTH as f32;
+                let f_height = HEIGHT as f32;
+                let f_depth = DEPTH as f32;
+
                 let mut screen_coords =
                     [Vec3i::new(0, 0, 0), Vec3i::new(0, 0, 0), Vec3i::new(0, 0, 0)];
                 let mut world_coords =
                     [Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0), Vec3f::newi32(0, 0, 0)];
                 for j in 0..3 {
                     let v = verts[face[j]];
-                    let f_width = WIDTH as f32;
-                    let f_height = HEIGHT as f32;
+
                     screen_coords[j] = Vec3i::newf32((v[0] + 1f32) * f_width / 2f32,
                                                      (v[1] + 1f32) * f_height / 2f32,
-                                                     v[2]);
+                                                     (v[2] + 1f32) * f_depth / 2f32);
                     world_coords[j] = Vec3f::new(v[0], v[1], v[2]);
                 }
                 let n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
@@ -65,10 +60,8 @@ fn head_triangles(image: &mut TgaImage, light_dir: Vec3f) {
                     let mut uvs = [Vec2i::new(0, 0), Vec2i::new(0, 0), Vec2i::new(0, 0)];
                     for k in 0..3 {
                         let fuck = textures[text[k]];
-                        println!("fuck {:?}", fuck);
                         uvs[k] = Vec2i::new((fuck[0] * texture.width() as f32) as i32,
                                             (fuck[1] * texture.height() as f32) as i32);
-                        println!("uv {:?}", uvs[k]);
                     }
 
                     triangle(screen_coords, uvs, image, intensity, &mut zbuffer, &texture);
