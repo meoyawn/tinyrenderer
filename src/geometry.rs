@@ -124,20 +124,22 @@ pub struct Vec3i {
 
 impl Vec3i {
     pub fn new(x: i32, y: i32, z: i32) -> Vec3i {
-        Vec3i { x: x, y: y, z: z, }
+        Vec3i { x: x, y: y, z: z }
     }
     pub fn newf32(x: f32, y: f32, z: f32) -> Vec3i {
         Vec3i::new(x as i32, y as i32, z as i32)
     }
     pub fn newVec3f(v: Vec3f) -> Vec3i {
-        Vec3i::new(v.x as i32, v.y as i32, v.z as i32)
+        Vec3i::newf32(v.x + 0.5f32, v.y + 0.5f32, v.z + 0.5f32)
     }
 }
 
 impl Add<Vec3f> for Vec3i {
     type Output = Vec3i;
     fn add(self, rhs: Vec3f) -> Vec3i {
-        Vec3i::new(self.x + rhs.x as i32, self.y + rhs.y as i32, self.z + rhs.z as i32)
+        Vec3i::new(self.x + rhs.x as i32,
+                   self.y + rhs.y as i32,
+                   self.z + rhs.z as i32)
     }
 }
 

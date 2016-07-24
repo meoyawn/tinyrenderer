@@ -24,8 +24,13 @@ pub struct TgaColor {
 }
 
 impl TgaColor {
-    pub fn new(rgba: &Rgba<u8>) -> TgaColor {
-        TgaColor { bgra: [rgba[2], rgba[1], rgba[0], rgba[3]] }
+    pub fn new(rgba: &Rgba<u8>, intensity: f32) -> TgaColor {
+        TgaColor {
+            bgra: [(rgba[2] as f32 * intensity) as u8,
+                   (rgba[1] as f32 * intensity) as u8,
+                   (rgba[0] as f32 * intensity) as u8,
+                   rgba[3]],
+        }
     }
     fn write<W: Write>(&self, w: &mut W) -> Result<usize> {
         w.write(&self.bgra)

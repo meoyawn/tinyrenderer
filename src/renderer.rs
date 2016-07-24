@@ -18,7 +18,9 @@ pub fn triangle(ts: [Vec3i; 3],
     let mut t0 = ts[0];
     let mut t1 = ts[1];
     let mut t2 = ts[2];
-    if t0.y == t1.y && t0.y == t2.y { return; }
+    if t0.y == t1.y && t0.y == t2.y {
+        return;
+    }
 
     let mut uv0 = uvs[0];
     let mut uv1 = uvs[1];
@@ -40,9 +42,17 @@ pub fn triangle(ts: [Vec3i; 3],
     let total_height = t2.y - t0.y;
     for i in 0..total_height {
         let second_half = i > t1.y - t0.y || t1.y == t0.y;
-        let segment_height = if second_half { t2.y - t1.y } else { t1.y - t0.y };
+        let segment_height = if second_half {
+            t2.y - t1.y
+        } else {
+            t1.y - t0.y
+        };
         let alpha = i as f32 / total_height as f32;
-        let xxx = if second_half { t1.y - t0.y } else { 0 };
+        let xxx = if second_half {
+            t1.y - t0.y
+        } else {
+            0
+        };
         let beta = (i - xxx) as f32 / segment_height as f32;
 
         let mut A = t0 + Vec3f::newVec3i(t2 - t0) * alpha;
@@ -63,14 +73,18 @@ pub fn triangle(ts: [Vec3i; 3],
         }
 
         for j in A.x..B.x + 1 {
-            let phi = if B.x == A.x { 1f32 } else { (j - A.x) as f32 / (B.x - A.x) as f32 };
+            let phi = if B.x == A.x {
+                1f32
+            } else {
+                (j - A.x) as f32 / (B.x - A.x) as f32
+            };
             let P: Vec3i = Vec3i::newVec3f(Vec3f::newVec3i(A) + Vec3f::newVec3i(B - A) * phi);
             let uvP: Vec2i = uvA + (uvB - uvA) * phi;
             let idx = (P.x + P.y * image.width as i32) as usize;
             if zbuffer[idx] < P.z {
                 zbuffer[idx] = P.z;
                 let color = diffuse(texture, uvP);
-                image.set(P.x as usize, P.y as usize, TgaColor::new(&color))
+                image.set(P.x as usize, P.y as usize, TgaColor::new(&color, intensity))
             }
         }
     }
