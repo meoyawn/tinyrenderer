@@ -1,5 +1,6 @@
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::io::{Result, Write};
+use image::Rgba;
 
 // Header used by TGA image files
 struct Header {
@@ -17,12 +18,15 @@ struct Header {
     image_desc: u8,
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone, Copy)]
 pub struct TgaColor {
     pub bgra: [u8; 4],
 }
 
 impl TgaColor {
+    pub fn new(rgba: &Rgba<u8>) -> TgaColor {
+        TgaColor { bgra: [rgba[2], rgba[1], rgba[0], rgba[3]] }
+    }
     fn write<W: Write>(&self, w: &mut W) -> Result<usize> {
         w.write(&self.bgra)
     }

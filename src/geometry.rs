@@ -107,14 +107,51 @@ impl Index<usize> for Vec2i {
     }
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3f {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct Vec3i {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl Vec3i {
+    pub fn new(x: i32, y: i32, z: i32) -> Vec3i {
+        Vec3i {
+            x: x,
+            y: y,
+            z: z,
+        }
+    }
+    pub fn newVec3f(v: Vec3f) -> Vec3i {
+        Vec3i::new(v.x as i32, v.y as i32, v.z as i32)
+    }
+}
+
+impl Add<Vec3f> for Vec3i {
+    type Output = Vec3i;
+    fn add(self, rhs: Vec3f) -> Vec3i {
+        Vec3i::new(self.x + rhs.x as i32, self.y + rhs.y as i32, self.z + rhs.z as i32)
+    }
+}
+
+impl Sub for Vec3i {
+    type Output = Vec3i;
+    fn sub(self, rhs: Vec3i) -> Vec3i {
+        Vec3i::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
 impl Vec3f {
+    pub fn newVec3i(v: Vec3i) -> Vec3f {
+        Vec3f::newi32(v.x, v.y, v.z)
+    }
     pub fn new(x: f32, y: f32, z: f32) -> Vec3f {
         Vec3f { x: x, y: y, z: z }
     }
@@ -131,6 +168,13 @@ impl Vec3f {
     pub fn set(&mut self, x: i32, y: i32) {
         self.x = x as f32;
         self.y = y as f32;
+    }
+}
+
+impl Add for Vec3f {
+    type Output = Vec3f;
+    fn add(self, rhs: Vec3f) -> Vec3f {
+        Vec3f::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
@@ -168,6 +212,13 @@ impl Mul for Vec3f {
     type Output = f32;
     fn mul(self, rhs: Vec3f) -> f32 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+}
+
+impl Mul<f32> for Vec3f {
+    type Output = Vec3f;
+    fn mul(self, rhs: f32) -> Vec3f {
+        Vec3f::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
