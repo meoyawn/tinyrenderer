@@ -8,11 +8,6 @@ fn diffuse(img: &RgbaImage, uv: Vec2i) -> Rgba<u8> {
     img[(uv.x as u32, uv.y as u32)]
 }
 
-fn round(f: f32) -> f32 {
-    let lol = 100000f32;
-    (f * lol).ceil() / lol
-}
-
 pub fn triangle(ts: [Vec3i; 3],
                 uvs: [Vec2i; 3],
                 image: &mut TgaImage,
@@ -44,7 +39,7 @@ pub fn triangle(ts: [Vec3i; 3],
     }
 
     let total_height = t2.y - t0.y;
-    // println!("total height {:?}", total_height);
+
     for i in 0..total_height {
         let second_half = i > t1.y - t0.y || t1.y == t0.y;
         let segment_height = if second_half {
@@ -52,16 +47,13 @@ pub fn triangle(ts: [Vec3i; 3],
         } else {
             t1.y - t0.y
         };
-        let alpha = round(i as f32 / total_height as f32);
+        let alpha = i as f32 / total_height as f32;
         let xxx = if second_half {
             t1.y - t0.y
         } else {
             0
         };
-        let beta = round((i - xxx) as f32 / segment_height as f32);
-
-        println!("alpha {:?}", alpha);
-        println!("beta {:?}", beta);
+        let beta = (i - xxx) as f32 / segment_height as f32;
 
         let mut A = t0 + Vec3f::newVec3i(t2 - t0) * alpha;
         let mut B = if second_half {
@@ -69,8 +61,6 @@ pub fn triangle(ts: [Vec3i; 3],
         } else {
             t0 + Vec3f::newVec3i(t1 - t0) * beta
         };
-        println!("A {:?}", A);
-        println!("B {:?}", B);
 
         let mut uvA = uv0 + (uv2 - uv0) * alpha;
         let mut uvB = if second_half {

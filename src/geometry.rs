@@ -137,9 +137,9 @@ impl Vec3i {
 impl Add<Vec3f> for Vec3i {
     type Output = Vec3i;
     fn add(self, rhs: Vec3f) -> Vec3i {
-        Vec3i::new(self.x + rhs.x as i32,
-                   self.y + rhs.y as i32,
-                   self.z + rhs.z as i32)
+        Vec3i::new(self.x + rhs.x.round() as i32,
+                   self.y + rhs.y.round() as i32,
+                   self.z + rhs.z.round() as i32)
     }
 }
 
