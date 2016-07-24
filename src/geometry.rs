@@ -1,11 +1,12 @@
 use std::ops::{Add, Sub, Mul, Index, BitXor, IndexMut};
 
+#[derive(Clone, Copy, Debug)]
 pub struct Vec2i {
     pub x: i32,
     pub y: i32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec2f {
     pub x: f32,
     pub y: f32,
@@ -123,11 +124,10 @@ pub struct Vec3i {
 
 impl Vec3i {
     pub fn new(x: i32, y: i32, z: i32) -> Vec3i {
-        Vec3i {
-            x: x,
-            y: y,
-            z: z,
-        }
+        Vec3i { x: x, y: y, z: z, }
+    }
+    pub fn newf32(x: f32, y: f32, z: f32) -> Vec3i {
+        Vec3i::new(x as i32, y as i32, z as i32)
     }
     pub fn newVec3f(v: Vec3f) -> Vec3i {
         Vec3i::new(v.x as i32, v.y as i32, v.z as i32)
