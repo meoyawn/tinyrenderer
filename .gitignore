@@ -1,5 +1,5 @@
 target
-*.tga
+foo.tga
 *.lock
 .idea/
 *.iml
